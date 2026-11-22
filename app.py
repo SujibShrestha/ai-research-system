@@ -13,6 +13,9 @@ app = FastAPI(title="ai-research")
 # job_id -> {status, stage, message, result?, error?}
 jobs: dict[str, dict] = {}
 
+# Groq's TPM limit is per organization — concurrent runs would starve each other
+_pipeline_lock = threading.Lock()
+
 
 class ResearchRequest(BaseModel):
     topic: str = Field(min_length=3, max_length=200)
@@ -23,7 +26,9 @@ def _run(job_id: str, topic: str) -> None:
         jobs[job_id].update(stage=stage, message=message)
 
     try:
-        state = run_research_pipeline(topic, on_progress=on_progress)
+        jobs[job_id].update(message="Waiting for the current run to finish…")
+        with _pipeline_lock:
+            state = run_research_pipeline(topic, on_progress=on_progress)
         jobs[job_id].update(status="done", stage="done", message="Done", result=state)
     except Exception as exc:  # surface pipeline failures to the UI
         jobs[job_id].update(status="error", message=str(exc))

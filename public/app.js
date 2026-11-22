@@ -167,6 +167,7 @@ async function onSubmit(event) {
 
 function resume(id) {
   jobId = id;
+  ui.run.disabled = true;
   showPipeline();
   renderSteps();
   ui.message.textContent = "Resuming…";
