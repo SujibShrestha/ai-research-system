@@ -1,7 +1,17 @@
-from agents import build_search_agent, build_reader_agent, writer_chain, critic_prompt
+from agents import build_search_agent, build_reader_agent, writer_chain, critic_chain
+import sys
 
-def run_research_pipeline(topic:str)-> dict:
+# Windows consoles default to cp1252, which chokes on unicode in search results
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+def run_research_pipeline(topic:str, on_progress=None)-> dict:
+    # on_progress(stage, message) lets a UI follow along; CLI runs without one
+    progress = on_progress or (lambda *args: None)
     state ={}
+
+    progress("search", "Searching the web")
 
     # search_agent
 
@@ -19,6 +29,7 @@ def run_research_pipeline(topic:str)-> dict:
 
     # reader_agent
     print('\n ---------------------------------------')
+    progress("read", "Reading the most relevant source")
     reader_agent = build_reader_agent()
     reader_result = reader_agent.invoke({
         'messages':[
@@ -33,6 +44,7 @@ def run_research_pipeline(topic:str)-> dict:
 
     # writer_chain
     print('\n ---------------------------------------')
+    progress("write", "Writing the research report")
     research_combined = (
         f"Search results: \n {state['search_result']}\n\n"
         f"Scraped content: \n {state['scraped_content']}"
@@ -48,7 +60,8 @@ def run_research_pipeline(topic:str)-> dict:
 
     #critic report
     print('\n ---------------------------------------')
-    state['feedback'] = critic_prompt.invoke({
+    progress("critique", "Critiquing the report")
+    state['feedback'] = critic_chain.invoke({
         'report': state['report']
     })
 

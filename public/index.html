@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ai-research · multi-agent research pipeline</title>
+  <meta name="description" content="Ask a topic, get a sourced research report written and critiqued by a LangChain agent pipeline.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <span class="wordmark">ai&#8202;-&#8202;research</span>
+      <span class="stack">langchain · groq · tavily</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p class="eyebrow">Multi-agent research pipeline</p>
+      <h1>Ask a topic.<br>Get a sourced report.</h1>
+      <p class="lede">A search agent scatters the query across the web, a reader agent digs into the best source,
+        a writer drafts the report, and a critic scores it.</p>
+
+      <form id="form" class="ask" autocomplete="off">
+        <label class="sr-only" for="topic">Research topic</label>
+        <input id="topic" name="topic" type="text" maxlength="200" required
+               placeholder="e.g. Impact of solid-state batteries on EV range"
+               aria-describedby="ask-hint">
+        <button id="run" type="submit">Run research</button>
+      </form>
+      <p class="hint" id="ask-hint">Press <kbd>Enter</kbd> · runs in about a minute</p>
+    </section>
+
+    <section id="pipeline" class="panel" hidden>
+      <div class="panel-head">
+        <h2 id="stage-message" aria-live="polite">Starting…</h2>
+        <span id="elapsed" class="elapsed" aria-hidden="true">0s</span>
+      </div>
+      <ol id="steps" class="steps"></ol>
+      <div id="error" class="error" hidden>
+        <p id="error-text"></p>
+        <button id="retry" type="button">Try again</button>
+      </div>
+    </section>
+
+    <section id="results" hidden>
+      <div class="result-head">
+        <div class="score" id="score" hidden>
+          <span class="score-value" id="score-value"></span>
+          <span class="score-label">critic score</span>
+        </div>
+        <div class="verdict">
+          <p class="eyebrow">Critic verdict</p>
+          <p id="verdict-text">—</p>
+        </div>
+        <button id="copy" class="ghost" type="button">Copy report</button>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Research output">
+        <button role="tab" id="tab-btn-report" aria-controls="tab-report" aria-selected="true">Report</button>
+        <button role="tab" id="tab-btn-feedback" aria-controls="tab-feedback" aria-selected="false" tabindex="-1">Feedback</button>
+        <button role="tab" id="tab-btn-sources" aria-controls="tab-sources" aria-selected="false" tabindex="-1">Sources</button>
+        <button role="tab" id="tab-btn-raw" aria-controls="tab-raw" aria-selected="false" tabindex="-1">Raw research</button>
+      </div>
+
+      <div class="tab-panels">
+        <div class="tab-panel prose" role="tabpanel" id="tab-report" aria-labelledby="tab-btn-report"></div>
+        <div class="tab-panel prose plain" role="tabpanel" id="tab-feedback" aria-labelledby="tab-btn-feedback" hidden></div>
+        <div class="tab-panel" role="tabpanel" id="tab-sources" aria-labelledby="tab-btn-sources" hidden></div>
+        <div class="tab-panel" role="tabpanel" id="tab-raw" aria-labelledby="tab-btn-raw" hidden></div>
+      </div>
+    </section>
+
+    <section class="how" aria-labelledby="how-title">
+      <p class="eyebrow" id="how-title">How it works</p>
+      <ol class="how-grid">
+        <li>
+          <span class="how-num">01</span>
+          <h3>Search</h3>
+          <p>Tavily returns the five most relevant results for your topic.</p>
+        </li>
+        <li>
+          <span class="how-num">02</span>
+          <h3>Read</h3>
+          <p>The reader agent picks the best URL and scrapes it for depth.</p>
+        </li>
+        <li>
+          <span class="how-num">03</span>
+          <h3>Write</h3>
+          <p>GPT-OSS drafts an introduction, key findings, conclusion and sources.</p>
+        </li>
+        <li>
+          <span class="how-num">04</span>
+          <h3>Critique</h3>
+          <p>A critic scores the draft out of 10 and lists what to improve.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>ai-research</span>
+      <span class="muted">search → read → write → critique</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
