@@ -30,16 +30,21 @@ def build_reader_agent():
 
 # writer chain
 writer_prompt = ChatPromptTemplate.from_messages([
-    ("system",'You are a expert researcher and writer. You will be given a topic and you will write a detailed report on it.'),
-    ('human','''Write a detailed report on the topic: {topic}.
-    
-    Research Gathered:
-    {research}
+    ("system", "You are an expert research writer. Write clear, structured and insightful reports."),
+    ("human", """Write a detailed research report on the topic below.
 
-    structure your report with an introduction, main body, and conclusion.
-    Use clear and concise language, and provide references to the sources of information used in your research.
-    '''
-    ),
+Topic: {topic}
+
+Research Gathered:
+{research}
+
+Structure the report as:
+- Introduction
+- Key Findings (minimum 3 well-explained points)
+- Conclusion
+- Sources (list all URLs found in the research)
+
+Be detailed, factual and professional."""),
 ])
 
 # writer chain

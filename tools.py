@@ -29,24 +29,12 @@ def web_search(query:str)-> str:
 
 @tool
 def scrape_url(url: str) -> str:
-    """Fetch a web page and return its title and visible text."""
-    parsed_url = urlparse(url)
-    if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
-        raise ValueError("url must be an absolute HTTP or HTTPS URL")
-
+    """Scrape and return clean text content from a given URL for deeper reading."""
     try:
-        response = requests.get(
-            url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=15,
-        )
-        response.raise_for_status()
-    except requests.RequestException as exc:
-        raise RuntimeError(f"Unable to fetch URL: {url}") from exc
-
-    soup = BeautifulSoup(response.text, "html.parser")
-    for element in soup(["script", "style", "noscript"]):
-        element.decompose()
-
-    return soup.get_text(separator=" ", strip=True)[:3000]
-
+        resp = requests.get(url, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
+        soup = BeautifulSoup(resp.text, "html.parser")
+        for tag in soup(["script", "style", "nav", "footer"]):
+            tag.decompose()
+        return soup.get_text(separator=" ", strip=True)[:3000]
+    except Exception as e:
+        return f"Could not scrape URL: {str(e)}"
